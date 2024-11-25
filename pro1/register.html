@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>login</title>
+    <title>register</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 
@@ -67,8 +67,7 @@
         <label for="password">รหัสผ่าน</label>
         <input type="password" id="password" name="password" placeholder="กรอกรหัสผ่าน">
 
-        <button type="submit" id="loginButton">เข้าสู่ระบบ</button>
-        <button type="register" id="GoToregister">ลงทะเบียน</button>
+        <button type="register" id="goTologin">ลงทะเบียน</button>
         <div id="login-result" class="login-result"></div>
     </div>
 
@@ -130,47 +129,57 @@
         }
     </style>
 
-    
-<script>
-    // Event Listener สำหรับปุ่ม "เข้าสู่ระบบ"
-    document.getElementById('loginButton').addEventListener('click', function () {
-        const email = document.getElementById('email').value.trim();
-        const password = document.getElementById('password').value.trim();
-        const resultDiv = document.getElementById('login-result');
+    <script>
+        document.getElementById('goTologin').addEventListener('click', function () {
+            const emailInput = document.getElementById('email');
+            const passwordInput = document.getElementById('password');
+            const resultDiv = document.getElementById('login-result');
 
-        if (!email || !password) {
-            resultDiv.textContent = "กรุณากรอกอีเมลและรหัสผ่าน!";
-            resultDiv.style.color = "red";
-            return;
-        }
+            // ตรวจสอบว่าผู้ใช้กรอกข้อมูลครบถ้วนหรือไม่
+            const email = emailInput.value.trim();
+            const password = passwordInput.value.trim();
 
-        const users = JSON.parse(localStorage.getItem('users')) || [];
-        const user = users.find(user => user.email === email && user.password === password);
+            if (!email || !password) {
+                resultDiv.textContent = "กรุณากรอกอีเมลและรหัสผ่าน!";
+                resultDiv.style.color = "red";
+                return;
+            }
 
-        if (user) {
-            resultDiv.textContent = "เข้าสู่ระบบสำเร็จ!";
+            // ดึงข้อมูลผู้ใช้จาก Local Storage
+            let users = [];
+
+            try {
+                // พยายามดึงข้อมูลจาก Local Storage
+                users = JSON.parse(localStorage.getItem('users')) || [];
+            } catch (e) {
+                console.error("Error parsing users from localStorage", e);
+            }
+
+            // ตรวจสอบว่าผู้ใช้งานมีอยู่ในระบบหรือไม่
+            const userExists = users.some(user => user.email === email);
+            if (userExists) {
+                resultDiv.textContent = "อีเมลนี้ถูกใช้ลงทะเบียนแล้ว!";
+                resultDiv.style.color = "red";
+                return;
+            }
+
+            // เพิ่มผู้ใช้ใหม่เข้าไปในระบบ
+            users.push({ email, password });
+
+            // บันทึกข้อมูลผู้ใช้ลงใน Local Storage
+            localStorage.setItem('users', JSON.stringify(users));
+
+            resultDiv.textContent = "ลงทะเบียนสำเร็จ! กำลังไปที่หน้าเข้าสู่ระบบ...";
             resultDiv.style.color = "green";
 
-            setTimeout(() => {
-                window.location.href = "loading.html";
+            // ไปยังหน้า Login
+            setTimeout(function () {
+                window.location.href = "login.html";
             }, 2000);
-
-            setTimeout(() => {
-                window.location.href = "home.html";
-            }, 5000);
-        } else {
-            resultDiv.textContent = "ชื่อผู้ใช้งานหรือรหัสผ่านไม่ถูกต้อง!";
-            resultDiv.style.color = "red";
-        }
-    });
-
-    // Event Listener สำหรับปุ่ม "ลงทะเบียน"
-    document.getElementById('GoToregister').addEventListener('click', function () {
-        window.location.href = "register.html";
-    });
-</script>
+        });
 
 
+    </script>
 </body>
 
 </html>
